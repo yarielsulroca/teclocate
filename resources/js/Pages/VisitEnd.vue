@@ -77,7 +77,7 @@ async function finishVisit(visitaId) {
             console.log('Latitude:', latitude, 'Longitude:', longitude);
             console.log(visitaId);
             try {
-                const response = await axios.put(`/api/visitas/update/${visitaId}`, {
+                const response = await axios.put(`/api/visitas/${visitaId}`, {
                     latitude: latitude,
                     longitude: longitude
                 });

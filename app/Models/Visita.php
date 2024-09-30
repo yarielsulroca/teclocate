@@ -40,5 +40,19 @@ class Visita extends Model
     {
         return $this->belongsTo(\App\Models\Ticket::class, 'ticket_id', 'id');
     }
+    public function  calculateDistance($lat1, $lon1, $lat2, $lon2) {
+        $R = 6371000; // Radio de la Tierra en metros
+        $φ1 = deg2rad($lat1);
+        $φ2 = deg2rad($lat2);
+        $Δφ = deg2rad($lat2 - $lat1);
+        $Δλ = deg2rad($lon2 - $lon1);
+
+        $a = sin($Δφ / 2) * sin($Δφ / 2) +
+            cos($φ1) * cos($φ2) *
+            sin($Δλ / 2) * sin($Δλ / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $R * $c;
+    }
 
 }
