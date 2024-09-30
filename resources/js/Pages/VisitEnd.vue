@@ -77,21 +77,17 @@ async function finishVisit(visitaId) {
             console.log('Latitude:', latitude, 'Longitude:', longitude);
             console.log(visitaId);
             try {
-                const response = await axios.put(`api/visitas/${visitaId}`, {
-                    terminada: true,
-                    latitude: latitude,
-                    longitude: longitude
-                });
-                ticketValue = visitaId; // Ensure ticketValue is defined in your component's state
+                const response = await axios.put(`/visitas/update/${visitaId}/${latitude}/${longitude}`);
+                ticketValue = visitaId; // Asegúrate de que ticketValue esté definido en el estado de tu componente
                 console.log('Respuesta del servidor:', response.data); // Verifica la respuesta del servidor
-                showModal.value = true; // Ensure showModal is defined in your component's state
+                showModal.value = true; // Asegúrate de que showModal esté definido en el estado de tu componente
             } catch (err) {
                 if (err.response && err.response.status === 422) {
                     console.error('Error de validación:', err.response.data);
-                    alert('Error al Finalizar la visita: ' + err.response.data.message);
+                    alert('Error al finalizar la visita: ' + err.response.data.message);
                 } else {
-                    console.error('Error al Finalizar la visita:', err.message);
-                    alert('Error al Finalizar la visita: ' + err.message);
+                    console.error('Error al finalizar la visita:', err.message);
+                    alert('Error al finalizar la visita: ' + err.message);
                 }
             }
         }, (error) => {
@@ -131,11 +127,13 @@ onMounted(() => {
                     <p><strong>Cliente:</strong></p>
                     <p>{{ ticket.cliente.calle }} {{ ticket.cliente.numero }}</p>
                     <p>{{ ticket.cliente.localidad }}, {{ ticket.cliente.provincia }}</p>
-                    <div>
-                        <button @click="finishVisit(ticket.visita.id)" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
-                            Finalizar Visita
-                        </button>
-                    </div>
+                </div>
+                <div>
+                    <button @click="finishVisit(ticket.visita.id)" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                        Finalizar Visita
+                    </button>
+                </div>
+            </div>
         </div>
         <footer class="mt-8 text-gray-500">
             &copy; 2024 Ascensores Company ... By Kube Agency.
@@ -145,7 +143,7 @@ onMounted(() => {
         <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div class="bg-white text-black p-4 rounded-lg">
                 <h2 class="text-xl font-bold mb-4">Aceptar</h2>
-                <p>Se finalizó su visita corectamente</p>
+                <p>Se finalizó su visita correctamente</p>
                 <button @click="redirectToWhatsApp" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4">
                     Aceptar
                 </button>
