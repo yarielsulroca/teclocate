@@ -21,34 +21,46 @@ class VisitaController extends Controller
 
         return $R * $c;
     }
-    public function update($id, $latitude, $longitude) {
-        $visita = Visita::find($id);
-        if ($visita) {
-            // Validando distancias
-            $distancia = $this->calculateDistance($visita->cliente->latitude, $visita->cliente->longitude, $latitude, $longitude);
+    public function update(Request $request, $id) {
+        try {
+            $visita = Visita::find($id);
+            if ($visita) {
+                $latitude = $request->input('latitude');
+                $longitude = $request->input('longitude');
 
-            if ($distancia <= 50) {
-                $visita->terminada = true;
-                $visita->latitude = $latitude;
-                $visita->longitude = $longitude;
-                $visita->save();
+                // Validando distancias
+                $distancia = $this->calculateDistance($visita->cliente->latitude, $visita->cliente->longitude, $latitude, $longitude);
 
-                return response()->json([
-                    'message' => 'Visita terminada correctamente',
-                    'visita' => $visita,
-                    'distancia' => $distancia
-                ], 200);
-            } else {
-                return response()->json([
-                    'message' => 'Su distancia es mayor a 50 metros de las coordenadas de la visita',
-                    'distancia' => $distancia
-                ], 400);
+                if ($distancia <= 50) {
+                    $visita->ticket_id=$visita->ticket_id;
+                    $visita->comenzada= true;
+                    $visita->terminada = true;
+                    $visita->latitude = $latitude;
+                    $visita->longitude = $longitude;
+                    $visita->save();
+
+                    return response()->json([
+                        'message' => 'Visita terminada correctamente',
+                        'visita' => $visita,
+                        'distancia' => $distancia
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'message' => 'Su distancia es mayor a 50 metros de las coordenadas de la visita',
+                        'distancia' => $distancia
+                    ], 400);
+                }
             }
-        }
 
-        return response()->json([
-            'message' => 'No se encontró ninguna visita con ese ID',
-            'id' => $id
-        ], 400);
+            return response()->json([
+                'message' => 'No se encontró ninguna visita con ese ID',
+                'id' => $id
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

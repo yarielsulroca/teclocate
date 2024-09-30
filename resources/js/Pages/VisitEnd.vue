@@ -77,7 +77,10 @@ async function finishVisit(visitaId) {
             console.log('Latitude:', latitude, 'Longitude:', longitude);
             console.log(visitaId);
             try {
-                const response = await axios.put(`/visitas/update/${visitaId}/${latitude}/${longitude}`);
+                const response = await axios.put(`/api/visitas/update/${visitaId}`, {
+                    latitude: latitude,
+                    longitude: longitude
+                });
                 ticketValue = visitaId; // Asegúrate de que ticketValue esté definido en el estado de tu componente
                 console.log('Respuesta del servidor:', response.data); // Verifica la respuesta del servidor
                 showModal.value = true; // Asegúrate de que showModal esté definido en el estado de tu componente
