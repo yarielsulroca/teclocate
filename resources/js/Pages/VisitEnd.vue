@@ -37,16 +37,21 @@ async function makeApiRequest() {
                     numero: ticket.cliente.numero,
                     localidad: ticket.cliente.localidad,
                     provincia: ticket.cliente.provincia,
-                    latitude: ticket.cliente.latitude,
-                    longitude: ticket.cliente.longitude
+                    latitude: ticket.cliente.latitud,
+                    longitude: ticket.cliente.longitud
                 },
                 tecnico: {
                     phone: ticket.tecnico.phone
                 },
-            visita:{
-                id: ticket.visita.id}
+                visita: {
+                    id: ticket.visita.id,
+                    comenzada: ticket.visita.comenzada,
+                    terminada: ticket.visita.terminada
+                }
             }));
             allTickets.value = tickets.value;
+            // Filtrar los tickets para excluir aquellos cuya visita está finalizada
+            tickets.value = tickets.value.filter(ticket => !ticket.visita.terminada);
         } else {
             error.value = 'Los datos recibidos no son un array';
         }
@@ -55,9 +60,9 @@ async function makeApiRequest() {
             Swal.fire({
                 icon: 'info',
                 title: 'No se encontraron tickets',
-                text: err.response.data.message || 'No hay ningun tieket para usted.'
+                text: err.response.data.message || 'No hay ningun ticket para usted.'
             });
-            error.value = err.response.data.message || 'No hay ningun tieket para usted.';
+            error.value = err.response.data.message || 'No hay ningun ticket para usted.';
         } else {
             Swal.fire({
                 icon: 'error',
@@ -70,69 +75,67 @@ async function makeApiRequest() {
         loading.value = false;
     }
 }
-async function finishVisit(visitaId) {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const { latitude, longitude } = position.coords;
-            console.log('Latitude:', latitude, 'Longitude:', longitude);
-            console.log(visitaId);
-            try {
-                const response = await axios.put(`/api/visitas/${visitaId}`, {
-                    latitude: latitude,
-                    longitude: longitude
-                });
-                ticketValue = visitaId; // Asegúrate de que ticketValue esté definido en el estado de tu componente
-                console.log('Respuesta del servidor:', response.data); // Verifica la respuesta del servidor
-                showModal.value = true; // Asegúrate de que showModal esté definido en el estado de tu componente
-            } catch (err) {
-                if (err.response && err.response.status === 422) {
-                    console.error('Error de validación:', err.response.data);
-                    alert('Error al finalizar la visita: ' + err.response.data.message);
-                } else {
-                    console.error('Error al finalizar la visita:', err.message);
-                    alert('Error al finalizar la visita: ' + err.message);
-                }
-            }
-        }, (error) => {
-            console.error('Error al obtener la geolocalización:', error);
-            alert('Error al obtener la geolocalización: ' + error.message);
-        });
-    } else {
-        alert('La geolocalización no está soportada por este navegador.');
-    }
-}
-
-function redirectToWhatsApp(ticketValue) {
-    const phoneNumber = '+5491135289388';
-    const message = `visita Finalizada con ID: Ticket: ${ticketValue}`
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.location.href = whatsappUrl;
-}
 
 onMounted(() => {
     makeApiRequest();
 });
-</script>
 
+async function finishVisit(visitaId, lat1, long1) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log('Latitude:', latitude, 'Longitude:', longitude);
+        console.log('Id:', visitaId);
+        console.log(lat1, long1);
+        console.log(calculateDistance(lat1, long1, latitude, longitude));
+        const response = await axios.put(`/api/visitas/${visitaId}`, {
+                    latitude: latitude,
+                    longitude: longitude
+                });
+                showModal.value = true;
+    });
+}
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radio de la Tierra en kilómetros
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c; // Distancia en kilómetros
+    return distance;
+}
+function redirectToWhatsApp() {
+    const phoneNumber = '+5491135289388';
+    const message = `Visita Finalizada`;
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.location.href = whatsappUrl;
+}
+</script>
 <template>
-    <div class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="flex flex-col items-center justify-center min-h-screen p-4 text-white bg-black">
         <ApplicationLogo class="mb-4"></ApplicationLogo>
-        <h1 class="text-2xl font-bold mb-10">Tickets para Iniciar la Visita:</h1>
+        <h1 class="mb-10 text-2xl font-bold">Tickets para Iniciar la Visita:</h1>
         <div v-if="loading" class="text-gray-500">Cargando...</div>
         <div v-if="error" class="text-red-500">{{ error }}</div>
-        <div v-if="tickets.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-            <div v-for="ticket in tickets" :key="ticket.id" class="bg-gray-800 border border-gray-700 rounded-lg p-4 w-full md:w-80 h-auto">
-                <h2 class="text-xl font-semibold mb-2">Ticket #{{ ticket.nro_ticket }}</h2>
+        <div v-if="tickets.length > 0" class="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div v-for="ticket in tickets" :key="ticket.id" class="w-full h-auto p-4 bg-gray-800 border border-gray-700 rounded-lg md:w-80">
+                <h2 class="mb-2 text-xl font-semibold">Ticket #{{ ticket.nro_ticket }}</h2>
                 <p>Descripción:</p>
                 <p class="mb-2">{{ ticket.descripcion }}</p>
-                <p class="mb-2">{{ ticket.fecha_asignacion }} : {{ ticket.prioridad }}</p>
-                <div class="text-gray-400 mb-4">
+                <p class="mb-2">{{ new Date(ticket.fecha_asignacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) }} : <span :class="{
+                    'text-red-500': ticket.prioridad === 'alta',
+                    'text-yellow-500': ticket.prioridad === 'media',
+                    'text-green-500': ticket.prioridad === 'baja'
+                }">{{ ticket.prioridad }}</span></p>
+                <div class="mb-4 text-gray-400">
                     <p><strong>Cliente:</strong></p>
                     <p>{{ ticket.cliente.calle }} {{ ticket.cliente.numero }}</p>
                     <p>{{ ticket.cliente.localidad }}, {{ ticket.cliente.provincia }}</p>
                 </div>
                 <div>
-                    <button @click="finishVisit(ticket.visita.id)" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                    <button @click="finishVisit(ticket.visita.id, ticket.cliente.latitude, ticket.cliente.longitude)" class="px-4 py-2 font-bold text-white bg-yellow-500 rounded hover:bg-yellow-700">
                         Finalizar Visita
                     </button>
                 </div>
@@ -144,13 +147,24 @@ onMounted(() => {
 
         <!-- Modal -->
         <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-white text-black p-4 rounded-lg">
-                <h2 class="text-xl font-bold mb-4">Aceptar</h2>
+            <div class="p-4 text-black bg-white rounded-lg">
+                <h2 class="mb-4 text-xl font-bold">Aceptar</h2>
                 <p>Se finalizó su visita correctamente</p>
-                <button @click="redirectToWhatsApp" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4">
+                <button @click="redirectToWhatsApp()" class="px-4 py-2 mt-4 font-bold text-white bg-green-500 rounded hover:bg-green-700">
                     Aceptar
                 </button>
             </div>
         </div>
     </div>
 </template>
+<style scoped>
+.text-red-500 {
+    color: #f56565;
+}
+.text-yellow-500 {
+    color: #ecc94b;
+}
+.text-green-500 {
+    color: #48bb78;
+}
+</style>

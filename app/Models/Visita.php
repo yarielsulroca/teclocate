@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Visita extends Model
 {
-    
+
     protected $perPage = 20;
 
     /**
