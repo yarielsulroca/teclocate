@@ -116,7 +116,7 @@ function redirectToWhatsApp() {
 <template>
     <div class="flex flex-col items-center justify-center min-h-screen p-4 text-white bg-black">
         <ApplicationLogo class="mb-4"></ApplicationLogo>
-        <h1 class="mb-10 text-2xl font-bold">Tickets para Iniciar la Visita:</h1>
+        <h1 class="mb-10 text-2xl font-bold">Visitas para Finalizar:</h1>
         <div v-if="loading" class="text-gray-500">Cargando...</div>
         <div v-if="error" class="text-red-500">{{ error }}</div>
         <div v-if="tickets.length > 0" class="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

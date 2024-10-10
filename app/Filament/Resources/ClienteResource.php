@@ -117,7 +117,7 @@ class ClienteResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->actions([/*
                 Action::make('import')
                 ->label('Importar Clientes')
                 ->form([
@@ -174,7 +174,7 @@ class ClienteResource extends Resource
                             ->danger()
                             ->send();
                     }
-                }),
+                }), */
             Action::make('export')
                 ->label('Exportar Clientes')
                 ->action(function () {
@@ -185,7 +185,7 @@ class ClienteResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                ])->button(),
             ]);
     }
 

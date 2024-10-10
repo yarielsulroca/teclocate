@@ -23,6 +23,7 @@ use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\Filter;
 
 class VisitaResource extends Resource
 {
@@ -117,19 +118,16 @@ class VisitaResource extends Resource
             TextColumn::make('latitude')
                 ->label('Latitud')
                 ->sortable()
-                ->searchable()
                 ->toggleable(isToggledHiddenByDefault: true),
 
             TextColumn::make('longitude')
                 ->label('Longitud')
                 ->sortable()
-                ->searchable()
                 ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                 ->label('Iniciada')
                 ->sortable()
-                ->searchable()
                 ->dateTime('d/m/Y H:i')
                 ->toggleable(isToggledHiddenByDefault: true),
 
@@ -153,9 +151,9 @@ class VisitaResource extends Resource
                 ->getStateUsing(fn ($record) => $record->ticket->tecnico->phone ?? 'N/A'),
 
                 ])
-            ->filters([
-                // Puedes agregar filtros aquí si es necesario
-            ])
+                ->filters([
+
+                ])
             ->actions([
 
             ])

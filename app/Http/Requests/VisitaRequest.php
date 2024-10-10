@@ -26,7 +26,7 @@ class VisitaRequest extends FormRequest
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'comenzada' => 'required|boolean',
-            'terminada' => 'required|boolean',
+            'terminada' => 'nullable|boolean',
         ];
     }
 
