@@ -22,13 +22,15 @@ class VisitaApiController extends Controller
 
     public function store(VisitaRequest $request)
     {
+    
+        $distance = $visita->calculateDistance($la1, $lo1, $la2, $lo2);
         try {
             $visita = Visita::create([
                 'ticket_id' => $request->ticket_id,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
                 'comenzada' => $request->comenzada,
-                'terminada' => $request->terminada,
+                'terminada' => $request->terminada
             ]);
 
             return response()->json(['message' => 'Visita creada exitosamente', 'data' => $visita], 201);
@@ -57,7 +59,8 @@ class VisitaApiController extends Controller
                             'comenzada' => true,
                             'terminada' => true,
                             'latitude' => $latitude,
-                            'longitude' => $longitude
+                            'longitude' => $longitude,
+                            'long_end' => $distance
                         ]);
                         $visita->save();
                         return response()->json([

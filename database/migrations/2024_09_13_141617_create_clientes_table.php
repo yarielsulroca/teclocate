@@ -28,7 +28,7 @@ return new class extends Migration
             $table->integer('tiempo_servicio')->nullable();
             $table->string('tipo', 191)->nullable();
             $table->string('zona', 191)->nullable();
-            $table->text('direccion_detalle')->nullable();
+            $table->text('zona')->nullable();
             $table->string('phone', 191)->nullable();
             $table->string('correo', 191)->nullable();
 
